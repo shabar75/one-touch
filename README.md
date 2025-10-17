@@ -1,12 +1,11 @@
 ![](screenshots/about_image_full.png)
-# ScreenStream
+# OneTouch
 
-ScreenStream is a user-friendly Android application that allows users to easily share their device screen and audio and view it directly in a web browser. No additional software is required other than the ScreenStream itself, a web browser, and an internet connection (for Global mode).
+OneTouch is a user-friendly Android application that allows users to easily share their device screen and audio and view it directly in a web browser. No additional software is required other than OneTouch itself, a web browser, and an internet connection (for Global mode).
 
-Google Play version supports all modes: **Global mode (WebRTC)**, **Local mode (MJPEG)** and **RTSP mode** with ads included.<br>
-Versions from F-Droid are ad-free and support only **Local mode (MJPEG)** and **RTSP mode**.
+Supports three modes: **Global mode (WebRTC)**, **Local mode (MJPEG)** and **RTSP mode**.
 
-<a href='https://play.google.com/store/apps/details?id=info.dvkr.screenstream'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="100"/></a> <a href="https://f-droid.org/packages/info.dvkr.screenstream/" target="_blank"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="100"/></a>
+
 
  * [Project support](#project-support)
  * [Stream modes](#stream-modes)
@@ -21,7 +20,7 @@ Versions from F-Droid are ad-free and support only **Local mode (MJPEG)** and **
 
 ## Project support
 
-If you find **ScreenStream** useful, please consider donating to support its development.<br>
+If you find **OneTouch** useful, please consider donating to support its development.<br>
 Your contribution is greatly appreciated!
 
 **Tron (TRC20) USDT / USDC :** `TUKtTz3oe3qKYmm1ScDLKjRz9ty1FahpzR`
@@ -32,12 +31,12 @@ Your contribution is greatly appreciated!
 
 ## Stream modes
 
-ScreenStream offers three stream modes: **Global mode (WebRTC)** (in [Google Play Store](https://play.google.com/store/apps/details?id=info.dvkr.screenstream) version only), **Local mode (MJPEG)** and **RTSP mode**. All modes aim to stream the Android device screen and audio but function differently. They are independent of each other, with unique functionalities, restrictions, and customization options.
+OneTouch offers three stream modes: **Global mode (WebRTC)**, **Local mode (MJPEG)** and **RTSP mode**. All modes aim to stream the Android device screen and audio but function differently. They are independent of each other, with unique functionalities, restrictions, and customization options.
 
 | Mode               | Transport | Audio | Internet required | Server side | Security                              |
 |--------------------|-----------|-------|-------------------|-------------|---------------------------------------|
 | **Local (MJPEG)**  | HTTP MJPEG | ✕     | No                | Built‑in    | Optional 4‑digit PIN                  |
-| **Global (WebRTC)**| WebRTC    | ✓     | Yes               | Public signalling @ screenstream.io | End‑to‑end encryption + password |
+| **Global (WebRTC)**| WebRTC    | ✓     | Yes               | Public signalling @ onetouch.io | End‑to‑end encryption + password |
 | **RTSP**           | RTSP<br>H.265/H.264/AV1<br>OPUS/AAC/G.711 | ✓ | Depends on server | External RTSP server (e.g. MediaMTX) | Basic Auth + optional TLS |
 
 In **Global (WebRTC)** and **Local (MJPEG)** modes the number of clients is not directly limited, but it's important to keep in mind that each client consumes CPU resources and bandwidth for data transmission.
@@ -50,11 +49,11 @@ The application uses Android [MediaProjection](https://developer.android.com/ref
 > 
 > - **Delay in Streaming**: Expect a delay of at least 0.5-1 second or more in certain conditions: slow device, poor internet or network connection, or when the device is under heavy CPU load due to other applications.
 > 
-> - **Video Streaming Limitation**: ScreenStream is not designed for streaming video, particularly HD video. While it will function, the stream quality may not meet your expectations.
+> - **Video Streaming Limitation**: OneTouch is not designed for streaming video, particularly HD video. While it will function, the stream quality may not meet your expectations.
 
 ### Local mode (MJPEG)
 
-Local mode in the ScreenStream application is built on the MJPEG standard and utilizes an embedded HTTP server within the app. As a result, an internet connection is not required; instead, it can function on a local network, such as Wi-Fi, device hotspot, Network-over-USB, or any other network between the client's web browser and the Android device with the ScreenStream app.
+Local mode in the OneTouch application is built on the MJPEG standard and utilizes an embedded HTTP server within the app. As a result, an internet connection is not required; instead, it can function on a local network, such as Wi-Fi, device hotspot, Network-over-USB, or any other network between the client's web browser and the Android device with the OneTouch app.
 
 For optimal performance, a fast and stable network connection is recommended due to high traffic and low network delay requirements.
 
@@ -80,9 +79,9 @@ The Local mode offers the following functionality:
 
 ### Global mode (WebRTC)
 
-Global mode in the ScreenStream application is built on WebRTC technology and relies on an external signaling server to facilitate communication between the streaming host (the app) and the streaming client, which is a web browser equipped with the ScreenStream [Web Client](https://screenstream.io).
+Global mode in the OneTouch application is built on WebRTC technology and relies on an external signaling server to facilitate communication between the streaming host (the app) and the streaming client, which is a web browser equipped with the OneTouch [Web Client](https://onetouch.io).
 
-Both the signaling server and the web client for ScreenStream are open-source and available in the [ScreenStreamWeb](https://github.com/dkrivoruchko/ScreenStreamWeb) repository. These components can be accessed publicly at https://screenstream.io. The system is designed to function seamlessly with any desktop or mobile browser that supports WebRTC, such as Chrome, Safari, EDGE, Firefox, and others.
+Both the signaling server and the web client for OneTouch are open-source. These components can be accessed publicly at https://onetouch.io. The system is designed to function seamlessly with any desktop or mobile browser that supports WebRTC, such as Chrome, Safari, EDGE, Firefox, and others.
 
 The Global mode was introduced in app version 4 and offers the following functionality:
 - Powered by WebRTC technology.
@@ -93,12 +92,11 @@ The Global mode was introduced in app version 4 and offers the following functio
 - Requires an internet connection for streaming.
 - Individual data transmission for each client, with more clients requiring increased internet bandwidth to maintain optimal performance.
 
-> [!NOTE]
-> Global mode (WebRTC) only available in Google Play version
+
 
 ### RTSP mode
 
-RTSP mode in ScreenStream streams your Android device screen to an external RTSP media server, providing compatibility with a wide range of standard RTSP clients.
+RTSP mode in OneTouch streams your Android device screen to an external RTSP media server, providing compatibility with a wide range of standard RTSP clients.
 
 For optimal performance, a fast and stable network connection is recommended due to high traffic and low network delay requirements.
 
@@ -129,10 +127,10 @@ For optimal performance, a fast and stable network connection is recommended due
 
 To contribute with translation, kindly translate the following four files:
 
-1. https://github.com/dkrivoruchko/ScreenStream/blob/master/app/src/main/res/values/strings.xml
-1. https://github.com/dkrivoruchko/ScreenStream/blob/master/mjpeg/src/main/res/values/strings.xml
-1. https://github.com/dkrivoruchko/ScreenStream/blob/master/webrtc/src/main/res/values/strings.xml
-1. https://github.com/dkrivoruchko/ScreenStream/blob/master/rtsp/src/main/res/values/strings.xml
+1. https://github.com/dkrivoruchko/OneTouch/blob/master/app/src/main/res/values/strings.xml
+1. https://github.com/dkrivoruchko/OneTouch/blob/master/mjpeg/src/main/res/values/strings.xml
+1. https://github.com/dkrivoruchko/OneTouch/blob/master/webrtc/src/main/res/values/strings.xml
+1. https://github.com/dkrivoruchko/OneTouch/blob/master/rtsp/src/main/res/values/strings.xml
 
 Then, please, [make a pull request](https://help.github.com/en/articles/creating-a-pull-request) or send those translated files to the developer via e-mail <dkrivoruchko@gmail.com> as an attachment.
 
@@ -144,7 +142,7 @@ Developed by [Daxcore Technologies](dkrivoruchko@gmail.com). If there are any is
 
 ## Privacy Policy and Terms & Conditions
 
-App [Privacy Policy](https://github.com/dkrivoruchko/ScreenStream/blob/master/PrivacyPolicy.md) and [Terms & Conditions](https://github.com/dkrivoruchko/ScreenStream/blob/master/TermsConditions.md)
+App [Privacy Policy](https://github.com/dkrivoruchko/OneTouch/blob/master/PrivacyPolicy.md) and [Terms & Conditions](https://github.com/dkrivoruchko/OneTouch/blob/master/TermsConditions.md)
 
 ## License
 

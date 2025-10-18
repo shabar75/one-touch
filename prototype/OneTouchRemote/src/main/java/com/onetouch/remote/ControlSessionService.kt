@@ -19,7 +19,10 @@ class ControlSessionService : Service() {
             nm.createNotificationChannel(channel)
         }
         val stopIntent = Intent(this, ControlSessionService::class.java).apply { action = ACTION_STOP }
-        val stopPi = androidx.core.app.PendingIntentCompat.getService(this, 0, stopIntent, 0, false)
+        val flags = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            android.app.PendingIntent.FLAG_IMMUTABLE
+        } else 0
+        val stopPi = android.app.PendingIntent.getService(this, 0, stopIntent, flags)
         val notif: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
             .setContentTitle("OneTouch Remote Control Active")

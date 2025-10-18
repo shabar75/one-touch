@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>OneTouch Controller</title>
+  <style> body{font-family:sans-serif;margin:20px;} #log{white-space:pre;font-size:12px;} </style>
+</head>
+<body>
+  <h2>OneTouch Controller</h2>
+  <div>
+    <label>Stream ID <input id="stream"/></label>
+    <label>PIN <input id="pin" type="password"/></label>
+    <button id="connect">Connect</button>
+  </div>
+  <div>
+    <button onclick="sendTap(200,400)">Tap (200,400)</button>
+    <button onclick="sendText('Hello')">Send Text</button>
+  </div>
+  <div id="log"></div>
+  <script>
+    let dc;
+    function log(m){ document.getElementById('log').textContent += m+'\n'; }
+    async function connect(){
+      // Placeholder: use existing signalling to obtain SDP; here we create local DC
+      const pc = new RTCPeerConnection();
+      dc = pc.createDataChannel('control');
+      dc.onopen = ()=>log('DC open');
+      dc.onmessage = e=>log('<= '+e.data);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      log('Offer created (placeholder, no server)');
+    }
+    function base(type,payload){
+      return { seq: Date.now(), type, timestamp: Date.now(), client_id: 'web-'+Math.random().toString(16).slice(2), payload, mac: null };
+    }
+    function send(obj){ const s = JSON.stringify(obj); log('=> '+s); dc && dc.send(s); }
+    function sendTap(x,y){ send(base('gesture',{kind:'tap', points:[{x,y,id:0}], durationMs:60})); }
+    function sendText(t){ send(base('text',{text:t, focused:true})); }
+    document.getElementById('connect').onclick = connect;
+  </script>
+</body>
+</html>

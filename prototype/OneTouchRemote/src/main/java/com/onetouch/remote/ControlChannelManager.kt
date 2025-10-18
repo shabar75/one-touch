@@ -32,6 +32,7 @@ class ControlChannelManager(
 
     private var expectedSeq: Long = 0L
     private var activeControllerId: String? = null
+    private var authenticatedControllerId: String? = null
 
     fun initWebRtc(factory: PeerConnectionFactory, pc: PeerConnection) {
         peerConnectionFactory = factory
@@ -83,7 +84,34 @@ class ControlChannelManager(
                 return
             }
 
+            // require authentication first
+            if (type != "auth" && authenticatedControllerId != clientId) {
+                sendAck(seq, false, "not_authenticated")
+                return
+            }
+
             when (type) {
+                "auth" -> {
+                    val token = payload.optString("token")
+                    val streamId = payload.optString("stream_id")
+                    val pin = payload.optString("pin")
+                    // Validate token & PIN; require on-device consent
+                    val ok = AuthManager.validateToken(appContext, token) && AuthManager.validatePin(appContext, streamId, pin)
+                    if (!ok) { sendAck(seq, false, "auth_failed"); return }
+                    val cm = ConsentManager.get(appContext)
+                    if (!cm.isControllerAllowed(clientId)) {
+                        // Launch consent UI; user must accept on device
+                        val intent = android.content.Intent(appContext, SessionConsentActivity::class.java).apply {
+                            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            putExtra(SessionConsentActivity.EXTRA_CONTROLLER_ID, clientId)
+                        }
+                        appContext.startActivity(intent)
+                        // Ask client to retry after user consents
+                        sendAck(seq, false, "consent_required")
+                        return
+                    }
+                    authenticatedControllerId = clientId
+                }
                 "gesture" -> handleGesture(payload)
                 "text" -> handleText(payload)
                 "node_action" -> handleNodeAction(payload)
@@ -124,11 +152,36 @@ class ControlChannelManager(
                 val p0 = payload.getJSONArray("points").getJSONObject(0)
                 val x = p0.getDouble("x").toFloat()
                 val y = p0.getDouble("y").toFloat()
-                scope.launch(Dispatchers.Main) {
-                    accessibilityBridge.tap(x, y)
+                scope.launch(Dispatchers.Main) { accessibilityBridge.tap(x, y) }
+            }
+            "swipe" -> {
+                val arr = payload.getJSONArray("points")
+                if (arr.length() >= 2) {
+                    val p0 = arr.getJSONObject(0)
+                    val p1 = arr.getJSONObject(arr.length() - 1)
+                    val x0 = p0.getDouble("x").toFloat(); val y0 = p0.getDouble("y").toFloat()
+                    val x1 = p1.getDouble("x").toFloat(); val y1 = p1.getDouble("y").toFloat()
+                    val dur = payload.optLong("durationMs", 150L)
+                    scope.launch(Dispatchers.Main) { accessibilityBridge.swipe(x0, y0, x1, y1, dur) }
                 }
             }
-            // TODO: swipe, long_press, multi_touch (coalesce points/duration)
+            "long_press" -> {
+                val p0 = payload.getJSONArray("points").getJSONObject(0)
+                val x = p0.getDouble("x").toFloat()
+                val y = p0.getDouble("y").toFloat()
+                val dur = payload.optLong("durationMs", 600L)
+                scope.launch(Dispatchers.Main) { accessibilityBridge.longPress(x, y, dur) }
+            }
+            "multi_touch" -> {
+                val arr = payload.getJSONArray("points")
+                val pts = mutableListOf<Pair<Float, Float>>()
+                for (i in 0 until arr.length()) {
+                    val p = arr.getJSONObject(i)
+                    pts.add(p.getDouble("x").toFloat() to p.getDouble("y").toFloat())
+                }
+                val dur = payload.optLong("durationMs", 120L)
+                scope.launch(Dispatchers.Main) { accessibilityBridge.multiTouch(pts, dur) }
+            }
         }
     }
 
@@ -174,6 +227,9 @@ class ControlChannelManager(
 
 interface RemoteAccessibilityBridge {
     suspend fun tap(x: Float, y: Float)
+    suspend fun swipe(x0: Float, y0: Float, x1: Float, y1: Float, duration: Long)
+    suspend fun longPress(x: Float, y: Float, duration: Long)
+    suspend fun multiTouch(points: List<Pair<Float, Float>>, duration: Long)
     suspend fun setTextOnFocused(text: String)
     suspend fun performNodeAction(action: String, nodePath: String)
     suspend fun performGlobal(action: String)

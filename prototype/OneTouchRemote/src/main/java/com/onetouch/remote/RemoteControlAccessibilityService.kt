@@ -30,6 +30,27 @@ class RemoteControlAccessibilityService : AccessibilityService(), RemoteAccessib
         performGesture(GestureDescription.Builder().addStroke(stroke).build())
     }
 
+    suspend fun swipe(x0: Float, y0: Float, x1: Float, y1: Float, duration: Long) {
+        val path = Path().apply { moveTo(x0, y0); lineTo(x1, y1) }
+        val stroke = GestureDescription.StrokeDescription(path, 0, duration)
+        performGesture(GestureDescription.Builder().addStroke(stroke).build())
+    }
+
+    suspend fun longPress(x: Float, y: Float, duration: Long) {
+        val path = Path().apply { moveTo(x, y) }
+        val stroke = GestureDescription.StrokeDescription(path, 0, duration, false)
+        performGesture(GestureDescription.Builder().addStroke(stroke).build())
+    }
+
+    suspend fun multiTouch(points: List<Pair<Float, Float>>, duration: Long) {
+        val builder = GestureDescription.Builder()
+        points.forEachIndexed { idx, p ->
+            val path = Path().apply { moveTo(p.first, p.second) }
+            builder.addStroke(GestureDescription.StrokeDescription(path, 0, duration, idx != 0))
+        }
+        performGesture(builder.build())
+    }
+
     override suspend fun setTextOnFocused(text: String) {
         val root = rootInActiveWindow ?: return
         val focused = findFocusedEditable(root) ?: return

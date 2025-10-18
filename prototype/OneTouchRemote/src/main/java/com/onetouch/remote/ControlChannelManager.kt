@@ -41,16 +41,12 @@ class ControlChannelManager(
         init.ordered = true
         init.id = 0
         dataChannel = pc.createDataChannel("control", init)
-        dataChannel?.registerObserver(object : DataChannel.Observer {
-            override fun onBufferedAmountChange(previousAmount: Long) {}
-            override fun onStateChange() { Log.d(TAG, "DC state: ${dataChannel?.state()}") }
-            override fun onMessage(buffer: DataChannel.Buffer) {
-                val bytes = ByteArray(buffer.data.remaining())
-                buffer.data.get(bytes)
-                val text = String(bytes, StandardCharsets.UTF_8)
-                handleIncoming(text)
-            }
-        })
+        registerObserver(dataChannel)
+    }
+
+    fun attachToExistingDataChannel(channel: DataChannel) {
+        dataChannel = channel
+        registerObserver(channel)
     }
 
     fun initWebSocketFallback(url: String) {
@@ -65,6 +61,18 @@ class ControlChannelManager(
         })
     }
 
+    private fun registerObserver(channel: DataChannel?) {
+        channel?.registerObserver(object : DataChannel.Observer {
+            override fun onBufferedAmountChange(previousAmount: Long) {}
+            override fun onStateChange() { Log.d(TAG, "DC state: ${channel.state()}") }
+            override fun onMessage(buffer: DataChannel.Buffer) {
+                val bytes = ByteArray(buffer.data.remaining())
+                buffer.data.get(bytes)
+                val text = String(bytes, StandardCharsets.UTF_8)
+                handleIncoming(text)
+            }
+        })
+    }
     private fun handleIncoming(text: String) {
         try {
             val msg = JSONObject(text)

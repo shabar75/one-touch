@@ -80,9 +80,9 @@ The Local mode offers the following functionality:
 
 ### Global mode (WebRTC)
 
-Global mode in the OneTouch application is built on WebRTC technology and relies on an external signaling server to facilitate communication between the streaming host (the app) and the streaming client, which is a web browser equipped with the ScreenStream [Web Client](https://screenstream.io).
+Global mode in the OneTouch application is built on WebRTC technology and relies on an external signaling server to facilitate communication between the streaming host (the app) and the streaming client, which is a web browser equipped with the OneTouch [Web Client](https://screenstream.io).
 
-Both the signaling server and the web client for OneTouch are open-source and available in the [ScreenStreamWeb](https://github.com/dkrivoruchko/ScreenStreamWeb) repository. These components can be accessed publicly at https://screenstream.io. The system is designed to function seamlessly with any desktop or mobile browser that supports WebRTC, such as Chrome, Safari, EDGE, Firefox, and others.
+Both the signaling server and the web client for OneTouch are open-source and available in the [OneTouch Web](https://github.com/dkrivoruchko/ScreenStreamWeb) repository. These components can be accessed publicly at https://screenstream.io. The system is designed to function seamlessly with any desktop or mobile browser that supports WebRTC, such as Chrome, Safari, EDGE, Firefox, and others.
 
 The Global mode was introduced in app version 4 and offers the following functionality:
 - Powered by WebRTC technology.

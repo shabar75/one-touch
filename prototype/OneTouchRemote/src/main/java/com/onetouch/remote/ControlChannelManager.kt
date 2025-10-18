@@ -89,6 +89,9 @@ class ControlChannelManager(
                 "node_action" -> handleNodeAction(payload)
                 "global_action" -> handleGlobalAction(payload)
                 "call_request" -> handleCallRequest(payload)
+                "sms_request" -> handleSmsRequest(payload)
+                "app_launch" -> handleAppLaunch(payload)
+                "media_action" -> handleMediaAction(payload)
                 else -> sendAck(seq, false, "unknown_type")
             }
             sendAck(seq, true, null)
@@ -148,6 +151,22 @@ class ControlChannelManager(
     private fun handleCallRequest(payload: JSONObject) {
         val phone = payload.optString("phone")
         scope.launch(Dispatchers.Main) { accessibilityBridge.requestCall(phone) }
+    }
+
+    private fun handleSmsRequest(payload: JSONObject) {
+        val phone = payload.optString("phone")
+        val body = payload.optString("body")
+        scope.launch(Dispatchers.Main) { accessibilityBridge.requestSms(phone, body) }
+    }
+
+    private fun handleAppLaunch(payload: JSONObject) {
+        val pkg = payload.optString("package")
+        scope.launch(Dispatchers.Main) { accessibilityBridge.launchApp(pkg) }
+    }
+
+    private fun handleMediaAction(payload: JSONObject) {
+        val action = payload.optString("action")
+        scope.launch(Dispatchers.Main) { accessibilityBridge.mediaControl(action) }
     }
 
     companion object { private const val TAG = "ControlChannel" }

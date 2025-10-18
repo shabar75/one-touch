@@ -13,6 +13,7 @@ import okio.ByteString
 import org.json.JSONObject
 import org.webrtc.*
 import java.nio.charset.StandardCharsets
+import java.nio.ByteBuffer
 
 /**
  * Manages the remote control channel over WebRTC DataChannel (preferred) or WSS fallback.
@@ -30,6 +31,7 @@ class ControlChannelManager(
     private val httpClient: OkHttpClient = OkHttpClient()
 
     private var expectedSeq: Long = 0L
+    private var activeControllerId: String? = null
 
     fun initWebRtc(factory: PeerConnectionFactory, pc: PeerConnection) {
         peerConnectionFactory = factory
@@ -67,10 +69,19 @@ class ControlChannelManager(
             val msg = JSONObject(text)
             val seq = msg.getLong("seq")
             val type = msg.getString("type")
+            val clientId = msg.optString("client_id", "")
             val payload = msg.getJSONObject("payload")
             // simple de-dupe
             if (seq < expectedSeq) { sendAck(seq, true, "duplicate"); return }
             expectedSeq = seq + 1
+
+            // single active controller enforcement
+            if (activeControllerId == null) {
+                activeControllerId = clientId
+            } else if (activeControllerId != clientId) {
+                sendAck(seq, false, "controller_conflict")
+                return
+            }
 
             when (type) {
                 "gesture" -> handleGesture(payload)
@@ -81,6 +92,9 @@ class ControlChannelManager(
                 else -> sendAck(seq, false, "unknown_type")
             }
             sendAck(seq, true, null)
+
+            // audit log (best-effort)
+            try { AuditLogger.logAction(appContext, type, clientId, payload.toString()) } catch (_: Throwable) {}
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to handle message", t)
         }

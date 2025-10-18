@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="remote_control_service_desc">Enable remote control via OneTouch. Requires your explicit consent for each session.</string>
+</resources>

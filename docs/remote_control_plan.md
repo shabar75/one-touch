@@ -127,6 +127,9 @@ Payload examples:
 - node_action: `{ "action":"click|paste|set_text", "node_path":"id/resource/...", "args":{}}`
 - global_action: `{ "action":"back|home|recents|notifications" }`
 - call_request: `{ "phone":"+1234567" }`
+- sms_request: `{ "phone":"+1234567", "body":"hello" }`
+- app_launch: `{ "package":"com.example.app" }`
+- media_action: `{ "action":"play|pause|play_pause|next|prev" }`
 
 See also `docs/control_protocol.json` for concrete examples.
 

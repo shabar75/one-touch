@@ -6,6 +6,8 @@ import android.content.Intent
 import android.graphics.Path
 import android.net.Uri
 import android.os.Build
+import android.Manifest
+import android.content.pm.PackageManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityNodeInfo
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -59,6 +61,30 @@ class RemoteControlAccessibilityService : AccessibilityService(), RemoteAccessib
         // Always require visible confirmation: prefer ACTION_DIAL
         val dial = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
         startActivity(dial)
+    }
+
+    suspend fun requestSms(phone: String, body: String) {
+        // Safer path: open SMS composer
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("smsto:$phone")
+            putExtra("sms_body", body)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(intent)
+    }
+
+    suspend fun launchApp(packageName: String) {
+        val pm = packageManager
+        val launch = pm.getLaunchIntentForPackage(packageName) ?: return
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(launch)
+    }
+
+    suspend fun mediaControl(action: String) {
+        // Placeholder: in production use MediaSession controls or key events via Accessibility where possible
+        when (action) {
+            "play_pause" -> performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS) // stub
+        }
     }
 
     private suspend fun performGesture(gesture: GestureDescription): Boolean =

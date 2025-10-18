@@ -178,4 +178,7 @@ interface RemoteAccessibilityBridge {
     suspend fun performNodeAction(action: String, nodePath: String)
     suspend fun performGlobal(action: String)
     suspend fun requestCall(phone: String)
+    suspend fun requestSms(phone: String, body: String)
+    suspend fun launchApp(package: String)
+    suspend fun mediaControl(action: String)
 }

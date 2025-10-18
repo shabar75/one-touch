@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OneTouch Control Protocol",
+  "type": "object",
+  "properties": {
+    "seq": {"type": "integer", "minimum": 0},
+    "type": {"type": "string"},
+    "timestamp": {"type": "integer"},
+    "client_id": {"type": "string"},
+    "payload": {"type": "object"},
+    "mac": {"type": ["string", "null"]}
+  },
+  "required": ["seq", "type", "timestamp", "client_id", "payload"],
+  "examples": [
+    {
+      "seq": 1,
+      "type": "gesture",
+      "timestamp": 1715700000123,
+      "client_id": "controller-123",
+      "payload": {"kind":"tap", "points":[{"x":180, "y":420, "id":0}], "durationMs": 60},
+      "mac": null
+    },
+    {
+      "seq": 2,
+      "type": "text",
+      "timestamp": 1715700000456,
+      "client_id": "controller-123",
+      "payload": {"text": "Hello world", "focused": true},
+      "mac": null
+    },
+    {
+      "seq": 3,
+      "type": "call_request",
+      "timestamp": 1715700000789,
+      "client_id": "controller-123",
+      "payload": {"phone": "+15551234567"},
+      "mac": null
+    },
+    {
+      "seq": 4,
+      "type": "ack",
+      "timestamp": 1715700000900,
+      "client_id": "device",
+      "payload": {"ack_seq": 3, "status": "ok"},
+      "mac": null
+    }
+  ]
+}

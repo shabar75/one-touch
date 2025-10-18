@@ -1,0 +1,91 @@
+package com.onetouch.remote
+
+import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.GestureDescription
+import android.content.Intent
+import android.graphics.Path
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import android.view.accessibility.AccessibilityNodeInfo
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+
+class RemoteControlAccessibilityService : AccessibilityService(), RemoteAccessibilityBridge {
+
+    override fun onServiceConnected() {
+        // Service connected; user enabled manually in settings
+    }
+
+    override fun onAccessibilityEvent(event: android.view.accessibility.AccessibilityEvent?) { }
+
+    override fun onInterrupt() { }
+
+    // --- RemoteAccessibilityBridge implementation ---
+    override suspend fun tap(x: Float, y: Float) {
+        val path = Path().apply { moveTo(x, y) }
+        val stroke = GestureDescription.StrokeDescription(path, 0, 60)
+        performGesture(GestureDescription.Builder().addStroke(stroke).build())
+    }
+
+    override suspend fun setTextOnFocused(text: String) {
+        val root = rootInActiveWindow ?: return
+        val focused = findFocusedEditable(root) ?: return
+        val args = android.os.Bundle().apply {
+            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text)
+        }
+        focused.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
+    }
+
+    override suspend fun performNodeAction(action: String, nodePath: String) {
+        // Minimal placeholder: act on focused node for prototype
+        val node = rootInActiveWindow ?: return
+        when (action) {
+            "click" -> node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            "paste" -> node.performAction(AccessibilityNodeInfo.ACTION_PASTE)
+        }
+    }
+
+    override suspend fun performGlobal(action: String) {
+        when (action) {
+            "back" -> performGlobalAction(GLOBAL_ACTION_BACK)
+            "home" -> performGlobalAction(GLOBAL_ACTION_HOME)
+            "recents" -> performGlobalAction(GLOBAL_ACTION_RECENTS)
+            "notifications" -> performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
+        }
+    }
+
+    override suspend fun requestCall(phone: String) {
+        // Always require visible confirmation: prefer ACTION_DIAL
+        val dial = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+        startActivity(dial)
+    }
+
+    private suspend fun performGesture(gesture: GestureDescription): Boolean =
+        suspendCancellableCoroutine { cont ->
+            dispatchGesture(gesture, object : GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription) { cont.resume(true) }
+                override fun onCancelled(gestureDescription: GestureDescription) { cont.resume(false) }
+            }, null)
+        }
+
+    private fun findFocusedEditable(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
+        if (node == null) return null
+        if (node.isFocused && node.isEditable) return node
+        for (i in 0 until node.childCount) {
+            val res = findFocusedEditable(node.getChild(i))
+            if (res != null) return res
+        }
+        return null
+    }
+
+    companion object {
+        fun isEnabled(context: android.content.Context): Boolean {
+            // Best-effort check: user must enable manually
+            return Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            )?.contains(RemoteControlAccessibilityService::class.java.name) == true
+        }
+    }
+}
